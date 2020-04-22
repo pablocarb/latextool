@@ -17,12 +17,27 @@ def arguments():
                         help='Latex input file.')
     parser.add_argument('bib',
                         help='Bibtex output file.')
+    parser.add_argument('-b', default=None,
+                        help='Current bibtex file (faster).')
     return parser
+
+def read_bib(bib=None):
+    labels = set()
+    if bib is None:
+        return labels
+    with open(bib) as h:
+        for line in h:
+            if line.startswith('@'):
+                left, right = line.rstrip().split('{')
+                ref = right.split(',')[0]
+                labels.add(ref)
+    return labels
 
 if __name__ == '__main__':
     parser = arguments()
     args = parser.parse_args()
     f = args.tex
+    labels = read_bib(args.b)
     dois = set()
     with open(f) as h:
         for line in h:
@@ -33,7 +48,11 @@ if __name__ == '__main__':
                         y = 'doi:'+y
                     dois.add(y)
     with open(args.bib, 'w') as upv:
-        for y in dois:
+        if args.b is not None:
+            with open(args.b) as h:
+                for line in h:
+                    upv.write(line)
+        for y in dois - labels:
             out = get_bib_from_doi(y)
             if out[0]:
                 x = out[1].split(',')
