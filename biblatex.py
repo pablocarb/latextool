@@ -47,6 +47,12 @@ if __name__ == '__main__':
                     if not y.startswith('doi:'):
                         y = 'doi:'+y
                     dois.add(y)
+            for x in re.findall('{https://doi.org/([^}]*)}',line):
+                for y in x.split(','):
+                    y = re.sub(' ','',y)
+                    if not y.startswith('https://doi.org/'):
+                        y = 'https://doi.org/'+y
+                    dois.add(y)
     with open(args.bib, 'w') as upv:
         if args.b is not None:
             with open(args.b) as h:
